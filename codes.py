@@ -164,9 +164,10 @@ def give_up(cur, name):
   return dict(hint = None, side = other_side(cur["side"]))
 
 def colour_of(cur, name, word):
+  if not cur["side"]: return None
   white = cur["white_" + cur["side"]]                 # guessing side
   return "green" if word in cur["green"] else \
-         "white" if word in white else "yellow"
+         "white" if word in white else None
 
 def key_of(cur, name, word):
   key = cur["key"][other_side(cur["players"][name])]  # other side
