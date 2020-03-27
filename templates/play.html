@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <!--
+
+    File        : templates/play.html
+    Maintainer  : Felix C. Stegerman <flx@obfusk.net>
+    Date        : 2020-03-26
+
+    Copyright   : Copyright (C) 2020  Felix C. Stegerman
+    Version     : v0.0.1
+    License     : AGPLv3+
+
+  -->
+  <head>
+    {% include "_meta.html" %}
+    <title>codespy | {{ game }} | {{ name }}</title>
+    <style>
+      .green {
+        color:            white;
+        background-color: green;
+        border: 1px solid black;
+      }
+      .black {
+        color:            white;
+        background-color: black;
+        border: 1px solid white;
+      }
+      .white {
+        color:            black;
+        background-color: white;
+        border: 1px solid black;
+      }
+      .yellow {
+        color:            black;
+        background-color: yellow;
+        border: 1px solid black;
+      }
+      td {
+        width: 20%;
+        text-align: center;
+        padding: 1em;
+      }
+      button            { font-size: large; }
+      input[type=radio] { margin: 1px; }
+    </style>
+  </head>
+  <!-- macros -->
+  {% macro formstart(id) %}
+    <form id="{{ id }}" method="post">
+      <input type="hidden" name="game" value="{{ game }}" />
+      <input type="hidden" name="name" value="{{ name }}" />
+  {% endmacro %}
+  {% macro wordgrid() %}
+    <table>
+    {% for row in cur["grid"] %}
+      {% set i = loop.index %}
+      <tr>
+      {% for word in row %}
+        {% set j = loop.index %}
+        {% set c = colour_of(cur, name, word) if side else "yellow" %}
+        {% set k = key_of(cur, name, word) %}
+        <td class="{{ c if your_side else k }}">
+          {% if your_side and hint %}
+            <div>
+              <label for="word-{{ i }}-{{ j }}">
+                {{ word }}
+              </label>
+            </div>
+            <br/>
+            <div>
+              <input type="radio" id="word-{{ i }}-{{ j }}"
+                name="word" value="{{ word }}" required
+                {% if c != "yellow" %}disabled{% endif %} />
+            </div>
+          {% else %}
+            <div>{{ word }}</div>
+            <br/>
+            <div class="{{ c }}">&nbsp;</div>
+          {% endif %}
+        </td>
+      {% endfor %}
+      </tr>
+    {% endfor %}
+    </table>
+  {% endmacro %}
+  <body>
+    <!-- refresh/restart/giveup form -->
+    {{ formstart("form0") }}
+    </form>
+    <!-- main form -->
+    {{ formstart("form") }}
+      <!-- game & player info -->
+      Game:
+      <a href="/?join=yes&game={{ game }}">{{ game }}</a>
+      <br/>
+      Side A: {{ ", ".join(players[0]|sort) }}
+      <br/>
+      Side B: {{ ", ".join(players[1]|sort) }}
+      <br/>
+      Your name: {{ name }}
+      <br/>
+      {% if side %}
+        <strong>
+          Your side is {{ "guessing" if your_side else "hinting" }}!
+        </strong>
+        <br/>
+      {% endif %}
+      {% if hint %}
+        <br/>
+        Hint: <strong>{{ hint }}</strong>
+        <br/>
+      {% endif %}
+      <br/>
+      {{ wordgrid() }}
+      <br/>
+      {% if cur["game_over"] %}
+        <strong>Game over.</strong>
+      {% elif cur["green"]|length == 15 %}
+        <strong>You win!</strong>
+      {% elif not side %}
+        <button name="action" value="start">Start!</button>
+      {% elif not hint %}
+        {% if not your_side %}
+          <label>
+            Hint: <input name="hint" required />
+          </label>
+          <br/>
+          <br/>
+          <button name="action" value="hint">New hint!</button>
+        {% else %}
+          Waiting for hint...
+        {% endif %}
+      {% else %}
+        {% if your_side %}
+          <button name="action" value="guess">Guess!</button>
+          <button name="action" value="give up" form="form0">Give up!</button>
+        {% else %}
+          Waiting for guess...
+        {% endif %}
+      {% endif %}
+      <br/>
+      <br/>
+      <hr/>
+      <button name="action" value="leave"   form="form0">Leave!</button>
+      <button name="action" value="restart" form="form0">Restart!</button>
+      <button name="action" value="rejoin"  form="form0">Rejoin!</button>
+      <br/>
+      <br/>
+      <small>NB: Restart discards the current game.</small>
+      <script>
+        document.getElementsByName("action").forEach(b => {
+          if (b.form.id == "form0") {
+            b.onclick = e => {
+              const q = `Are you sure you want to ${b.value}?`
+              if (!window.confirm(q)) { e.preventDefault() }
+            }
+          }
+        })
+      </script>
+    </form>
+    <noscript>
+      <br/>
+      <hr/>
+      <button form="form0">Refresh!</button>
+    </noscript>
+    <script>
+      window.onload = () => {
+        const tick = {{ tick }}
+        const f = () => {
+          const r = new XMLHttpRequest()
+          r.addEventListener("load", e => {
+            if (r.status != 200) { return }
+            const t = JSON.parse(r.responseText).tick
+            if (t > tick) {
+              document.getElementById("form0").submit()
+            } else {
+              setTimeout(f, {{ POLL }})
+            }
+          })
+          r.open("GET", "/status/{{ game }}")
+          r.send()
+        }
+        setTimeout(f, {{ POLL }})
+      }
+    </script>
+    {% include "_footer.html" %}
+  </body>
+</html>
