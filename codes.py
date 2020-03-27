@@ -34,7 +34,7 @@ from flask import Flask, jsonify, redirect, request, \
 # === logic ===
 
 POLL  = 1000
-LANGS = "green british dutch".split()
+LANGS = "green groen british dutch".split()
 
 class Oops(RuntimeError):
   def msg(self): return self.args[0]
