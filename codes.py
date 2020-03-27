@@ -5,7 +5,7 @@
 #
 # File        : codes.py
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2020-03-26
+# Date        : 2020-03-27
 #
 # Copyright   : Copyright (C) 2020  Felix C. Stegerman
 # Version     : v0.0.1
@@ -16,7 +16,12 @@
 # NB: only works single-threaded!
 
 # TODO:
-# * ...
+# * evaluate & improve game play
+# * filter british, dutch
+#
+# * better game over handling
+# * better error messages
+# * use websocket instead of polling
 
 import functools, itertools, os, random, secrets, time
 
@@ -39,13 +44,14 @@ class InvalidAction(Oops): pass
 class InvalidParam(Oops):
   def msg(self): return "invalid parameter: " + self.args[0]
 
-word_ok = regex.compile(r"^[\p{L}-]+$").match
+word_ok = regex.compile(r"^[\p{L}- .]+$").match
 
 # load words from disk
 WORDS = {}
 for lang in LANGS:
   with open("words/" + lang) as f:
-    WORDS[lang] = [ word.strip() for word in f if word_ok(word) ]
+    WORDS[lang] = [ word.strip().upper() for word in f
+                    if word_ok(word) ]
 
 # global state
 games = {}
@@ -158,14 +164,12 @@ def give_up(cur, name):
   return dict(hint = None, side = other_side(cur["side"]))
 
 def colour_of(cur, name, word):
-  side  = cur["side"]
-  white = cur["white_" + side]
+  white = cur["white_" + cur["side"]]                 # guessing side
   return "green" if word in cur["green"] else \
          "white" if word in white else "yellow"
 
 def key_of(cur, name, word):
-  side  = cur["players"][name]
-  key   = cur["key"][other_side(side)]
+  key = cur["key"][other_side(cur["players"][name])]  # other side
   return "green" if word in key["green"] else \
          "black" if word in key["black"] else "white"
 
@@ -242,7 +246,8 @@ def r_play():
       if action == "start":
         new = start_game(cur, name)
       elif action == "hint":
-        new = give_hint(cur, name, hint)
+        h   = "{} ({})".format(hint or "?", form.get("count") or "?")
+        new = give_hint(cur, name, h)
       elif action == "guess":
         new = make_guess(cur, name, word)
       elif action == "give up":

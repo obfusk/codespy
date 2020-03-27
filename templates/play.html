@@ -35,13 +35,21 @@
         background-color: yellow;
         border: 1px solid black;
       }
+      .box    { height: 1.2em; }
+      html    { width: max-content; }
+      button  { font-size: large; }
       td {
         width: 20%;
         text-align: center;
         padding: 1em;
       }
-      button            { font-size: large; }
-      input[type=radio] { margin: 1px; }
+      input[type=number]  { width: 3em; }
+      input[type=radio]   { margin: 0px; }
+      @media (max-width: 767px) {
+        html    { font-size: x-large; }
+        button  { font-size: x-large; }
+        td      { font-size: small; }
+      }
     </style>
   </head>
   <!-- macros -->
@@ -59,7 +67,7 @@
         {% set j = loop.index %}
         {% set c = colour_of(cur, name, word) if side else "yellow" %}
         {% set k = key_of(cur, name, word) %}
-        <td class="{{ c if your_side else k }}">
+        <td class="{{ c }}">
           {% if your_side and hint %}
             <div>
               <label for="word-{{ i }}-{{ j }}">
@@ -67,7 +75,7 @@
               </label>
             </div>
             <br/>
-            <div>
+            <div class="box {{ k }}">
               <input type="radio" id="word-{{ i }}-{{ j }}"
                 name="word" value="{{ word }}" required
                 {% if c != "yellow" %}disabled{% endif %} />
@@ -75,7 +83,7 @@
           {% else %}
             <div>{{ word }}</div>
             <br/>
-            <div class="{{ c }}">&nbsp;</div>
+            <div class="box {{ k }}">&nbsp;</div>
           {% endif %}
         </td>
       {% endfor %}
@@ -124,7 +132,10 @@
         {% set waiting = true %}
         {% if not your_side %}
           <label>
-            Hint: <input name="hint" required />
+            Hint: <input name="hint" required pattern="[^ ]+" />
+          </label>
+          <label>
+            <input type="number" name="count" min="1" max="99" />
           </label>
           <br/>
           <br/>

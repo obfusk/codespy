@@ -2,7 +2,7 @@
 
     File        : README.md
     Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-    Date        : 2020-03-26
+    Date        : 2020-03-27
 
     Copyright   : Copyright (C) 2020  Felix C. Stegerman
     Version     : v0.0.1
@@ -16,9 +16,10 @@
 
 ## Description
 
-codespy - ...
+codespy - cooperative spy code
 
-...
+Codespy is a web-based clone of the cooperative board game "Codenames
+Duet".
 
 ## Installing
 
