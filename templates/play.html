@@ -118,8 +118,10 @@
       {% elif cur["green"]|length == 15 %}
         <strong>You win!</strong>
       {% elif not side %}
+        {% set waiting = true %}
         <button name="action" value="start">Start!</button>
       {% elif not hint %}
+        {% set waiting = true %}
         {% if not your_side %}
           <label>
             Hint: <input name="hint" required />
@@ -131,6 +133,7 @@
           Waiting for hint...
         {% endif %}
       {% else %}
+        {% set waiting = true %}
         {% if your_side %}
           <button name="action" value="guess">Guess!</button>
           <button name="action" value="give up" form="form0">Give up!</button>
@@ -158,31 +161,34 @@
         })
       </script>
     </form>
-    <noscript>
-      <br/>
-      <hr/>
-      <button form="form0">Refresh!</button>
-    </noscript>
-    <script>
-      window.onload = () => {
-        const tick = {{ tick }}
-        const f = () => {
-          const r = new XMLHttpRequest()
-          r.addEventListener("load", e => {
-            if (r.status != 200) { return }
-            const t = JSON.parse(r.responseText).tick
-            if (t > tick) {
-              document.getElementById("form0").submit()
-            } else {
-              setTimeout(f, {{ POLL }})
-            }
-          })
-          r.open("GET", "/status/{{ game }}")
-          r.send()
+    {% if waiting %}
+      <noscript>
+        <br/>
+        <hr/>
+        <button form="form0">Refresh!</button>
+        <br/>
+      </noscript>
+      <script>
+        window.onload = () => {
+          const tick = {{ tick }}
+          const f = () => {
+            const r = new XMLHttpRequest()
+            r.addEventListener("load", e => {
+              if (r.status != 200) { return }
+              const t = JSON.parse(r.responseText).tick
+              if (t > tick) {
+                document.getElementById("form0").submit()
+              } else {
+                setTimeout(f, {{ POLL }})
+              }
+            })
+            r.open("GET", "/status/{{ game }}")
+            r.send()
+          }
+          setTimeout(f, {{ POLL }})
         }
-        setTimeout(f, {{ POLL }})
-      }
-    </script>
+      </script>
+    {% endif %}
     {% include "_footer.html" %}
   </body>
 </html>
