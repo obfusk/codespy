@@ -4,7 +4,7 @@
 
     File        : templates/play.html
     Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-    Date        : 2020-03-26
+    Date        : 2020-03-29
 
     Copyright   : Copyright (C) 2020  Felix C. Stegerman
     Version     : v0.0.1
@@ -34,13 +34,22 @@
         color:            black;
         background-color: #ddd;
       }
-      .box    { height: 1.2em; }
-      html    { width: max-content; }
-      button  { font-size: large; }
+      .box {
+        height: 1.2em;
+        margin: 1em;
+        margin-top: 0px;
+      }
+      .div {
+        display: block;
+        padding: 1em;
+      }
+      html            { width: max-content; }
+      fieldset, label { display: inline-block; }
+      fieldset        { background-color: #f6f5f4; }
+      button          { font-size: large; }
       td {
         width: 20%;
         text-align: center;
-        padding: 1em;
       }
       input[type=number]  { width: 3em; }
       input[type=radio]   { margin: 0px; }
@@ -69,19 +78,17 @@
         {% set k = key_of(cur, name, word) %}
         <td class="{{ c or "grey" }}">
           {% if your_side and hint and not c %}
-            <div>
-              <label for="word-{{ i }}-{{ j }}">
-                {{ word }}
-              </label>
-            </div>
-            <br/>
+            <label class="div" for="word-{{ i }}-{{ j }}">
+              {{ word }}
+            </label>
             <div class="box {{ k }}">
               <input type="radio" id="word-{{ i }}-{{ j }}"
                 name="word" value="{{ word }}" required />
             </div>
           {% else %}
-            <div>{{ word }}</div>
-            <br/>
+            <div class="div">
+              {{ word }}
+            </div>
             <div class="box {{ k }}">&nbsp;</div>
           {% endif %}
         </td>
@@ -89,6 +96,11 @@
       </tr>
     {% endfor %}
     </table>
+    {% if your_side and hint %}
+      <br/>
+      <small>NB: Click on a word to select it.</small>
+      <br/>
+    {% endif %}
   {% endmacro %}
   <body>
     <!-- refresh/restart/giveup form -->
@@ -130,13 +142,16 @@
       {% elif not hint %}
         {% set waiting = true %}
         {% if not your_side %}
-          <label>
-            Hint: <input name="hint" required pattern="[^ ]+" />
-          </label>
-          <label>
-            <input type="number" name="count" min="1" max="99"
-              value="0" />
-          </label>
+          <fieldset>
+            <legend>Hint</legend>
+            <label>
+              <input name="hint" required pattern="[^ ]+" />
+            </label>
+            <label>
+              <input type="number" name="count" min="1" max="99"
+                value="0" />
+            </label>
+          </fieldset>
           <br/>
           <br/>
           <button name="action" value="hint">New hint!</button>

@@ -62,6 +62,7 @@
               <input type="radio" name="lang" value="{{ lang }}"
                 required {% if loop.first %}checked{% endif %} />
               {{ lang }}
+              {% if not loop.last %}&nbsp;{% endif %}
             </label>
           {% endfor %}
         </fieldset>
@@ -76,6 +77,12 @@
       <br/>
       <br/>
       <small>NB: Spaces are not allowed in Game or Name.</small>
+      <br/>
+      <small>
+        NB: green/groen are the official 400 english/dutch words,
+        whereas british/dutch are lists of hundreds of thousands of
+        non-curated words.
+      </small>
     </form>
     {% include "_footer.html" %}
   </body>
