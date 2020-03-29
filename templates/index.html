@@ -4,7 +4,7 @@
 
     File        : templates/index.html
     Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-    Date        : 2020-03-26
+    Date        : 2020-03-29
 
     Copyright   : Copyright (C) 2020  Felix C. Stegerman
     Version     : v0.0.1
@@ -19,7 +19,9 @@
       <title>codespy</title>
     {% endif %}
     <style>
-      button { font-size: large; }
+      fieldset, label { display: inline-block; }
+      fieldset        { background-color: #f6f5f4; }
+      button          { font-size: large; }
     </style>
   </head>
   <body>
@@ -42,23 +44,27 @@
           pattern="[^ ]+" />
       </label>
       <br/>
-      Side:
-      <label>
-        <input type="radio" name="side" value="a" checked /> A
-      </label>
-      <label>
-        <input type="radio" name="side" value="b" /> B
-      </label>
+      <fieldset>
+        <legend>Side</legend>
+        <label>
+          <input type="radio" name="side" value="a" checked /> A
+        </label>
+        <label>
+          <input type="radio" name="side" value="b" /> B
+        </label>
+      </fieldset>
       {% if not join %}
         <br/>
-        Language:
-        {% for lang in langs %}
-          <label>
-            <input type="radio" name="lang" value="{{ lang }}"
-              required {% if loop.first %}checked{% endif %} />
-            {{ lang }}
-          </label>
-        {% endfor %}
+        <fieldset>
+          <legend>Language</legend>
+          {% for lang in langs %}
+            <label>
+              <input type="radio" name="lang" value="{{ lang }}"
+                required {% if loop.first %}checked{% endif %} />
+              {{ lang }}
+            </label>
+          {% endfor %}
+        </fieldset>
         <br/>
         <br/>
         <button>Play!</button>
