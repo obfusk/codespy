@@ -5,7 +5,7 @@
 #
 # File        : codes.py
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2020-03-27
+# Date        : 2020-03-29
 #
 # Copyright   : Copyright (C) 2020  Felix C. Stegerman
 # Version     : v0.0.1
@@ -23,9 +23,8 @@
 # * better error messages
 # * use websocket instead of polling
 
-import functools, itertools, os, random, secrets, time
+import itertools, os, random, secrets, time
 
-import jinja2
 import regex
 
 from flask import Flask, jsonify, redirect, request, \
