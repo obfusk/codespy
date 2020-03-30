@@ -1,0 +1,61 @@
+table {
+  background-color: #aaa;
+}
+
+.green {
+  color:            white;
+  background-color: green;
+}
+.black {
+  color:            white;
+  background-color: black;
+}
+.white {
+  color:            black;
+  background-color: white;
+}
+.grey {
+  color:            black;
+  background-color: #ddd;
+}
+
+.box {
+  height: 1.2em;
+  margin: 1em;
+  margin-top: 0px;
+}
+.div {
+  display: block;
+  padding: 1em;
+}
+
+fieldset, label { display: inline-block; }
+fieldset        { background-color: #f6f5f4; }
+button          { font-size: large; }
+
+td {
+  width: 20%;
+  text-align: center;
+}
+
+input[type=number]  { width: 3em; }
+input[type=radio]   { margin: 0px; }
+
+@media (max-width: 767px) {
+  html    { width: max-content; font-size: x-large; }
+  button  { font-size: x-large; }
+  input   { font-size: x-large; }
+  td      { font-size: small; }
+}
+
+@media (min-width: 767px) {
+  html { text-align: center; }
+  body {
+    text-align: initial;
+    width: 700px;
+    min-width: max-content;
+    margin: auto;
+    padding: 1em;
+    border: 1px solid grey;
+  }
+}
