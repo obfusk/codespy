@@ -5,7 +5,7 @@
 #
 # File        : codes.py
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2020-03-29
+# Date        : 2020-04-06
 #
 # Copyright   : Copyright (C) 2020  Felix C. Stegerman
 # Version     : v0.0.1
@@ -23,25 +23,17 @@
 # * better error messages
 # * use websocket instead of polling
 
-import itertools, os, random, secrets, time
+import itertools, json, os, random, secrets
 
 import regex
 
-from flask import Flask, jsonify, redirect, request, \
-                  render_template, url_for
+from flask import Flask, redirect, request, render_template, url_for
+
+from obfusk.webgames.common import *
 
 # === logic ===
 
-POLL  = 1000
 LANGS = "green groen british dutch".split()
-
-class Oops(RuntimeError):
-  def msg(self): return self.args[0]
-class InProgress(Oops):
-  def __init__(self): super().__init__("in progress")
-class InvalidAction(Oops): pass
-class InvalidParam(Oops):
-  def msg(self): return "invalid parameter: " + self.args[0]
 
 word_ok = regex.compile(r"^[\p{L}- .]+$").match
 
@@ -51,22 +43,6 @@ for lang in LANGS:
   with open("words/" + lang) as f:
     WORDS[lang] = [ word.strip().upper() for word in f
                     if word_ok(word) ]
-
-# global state
-games = {}
-
-def current_game(game):
-  return games[game]
-
-def restart_game(game):
-  del games[game]
-
-def update_game(game, new):
-  cur = current_game(game)
-  cur.update(new, tick = max(cur["tick"] + 1, int(time.time())))
-
-def valid_ident(s):
-  return s and s.isprintable() and all( not c.isspace() for c in s )
 
 def random_words(lang):
   words = random.sample(WORDS[lang], 25)
@@ -177,32 +153,15 @@ def data(cur, game, name):
   return dict(
     cur = cur, game = game, name = name, players = player_data(cur),
     your_side = cur["players"][name] == cur["side"],
-    side = cur["side"], hint = cur["hint"], tick = cur["tick"],
-    POLL = POLL, colour_of = colour_of, key_of = key_of
+    side = cur["side"], hint = cur["hint"],
+    colour_of = colour_of, key_of = key_of,
+    config = json.dumps(dict(game = game, tick = cur["tick"],
+                             POLL = POLL))
   )
 
 # === http ===
 
-app = Flask(__name__)
-
-if os.environ.get("CODESPY_HTTPS") == "force":
-  @app.before_request
-  def https_required():
-    if request.scheme != "https":
-      return redirect(request.url.replace("http:", "https:"), code = 301)
-  @app.after_request
-  def after_request_func(response):
-    response.headers["Strict-Transport-Security"] = 'max-age=63072000'
-    return response
-
-if os.environ.get("CODESPY_PASSWORD"):
-  PASSWORD = os.environ.get("CODESPY_PASSWORD")
-  @app.before_request
-  def auth_required():
-    auth = request.authorization
-    if not auth or auth.password != PASSWORD:
-      m = "Password required."
-      return m, 401, { "WWW-Authenticate": 'Basic realm="'+m+'"' }
+app = define_common_flask_stuff(Flask(__name__), "codespy")
 
 @app.route("/")
 def r_index():
@@ -212,10 +171,6 @@ def r_index():
     "index.html", game = game, name = args.get("name"),
     join = "join" in args, langs = LANGS
   )
-
-@app.route("/status/<game>")
-def r_status(game):
-  return jsonify(dict(tick = current_game(game)["tick"]))
 
 @app.route("/play", methods = ["POST"])
 def r_play():
