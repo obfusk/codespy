@@ -4,7 +4,7 @@
 
     File        : templates/play.html
     Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-    Date        : 2020-04-06
+    Date        : 2020-04-17
 
     Copyright   : Copyright (C) 2020  Felix C. Stegerman
     Version     : v0.0.1
@@ -63,6 +63,8 @@
     <!-- refresh/restart/giveup form -->
     {{ formstart("form0") }}
     </form>
+    {{ formstart("form1") }}
+    </form>
     <!-- main form -->
     {{ formstart("form") }}
       <!-- game & player info -->
@@ -96,6 +98,11 @@
       {% elif not side %}
         {% set waiting = true %}
         <button name="action" value="start">Start!</button>
+        <br/>
+        <br/>
+        <small>
+          NB: the side that starts the game will give the first hint.
+        </small>
       {% elif not hint %}
         {% set waiting = true %}
         {% if not your_side %}
@@ -119,7 +126,7 @@
         {% set waiting = true %}
         {% if your_side %}
           <button name="action" value="guess">Guess!</button>
-          <button name="action" value="give up" form="form0">Give up!</button>
+          <button name="action" value="end turn" form="form1">End turn!</button>
         {% else %}
           Waiting for guess...
         {% endif %}

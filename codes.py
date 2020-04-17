@@ -5,7 +5,7 @@
 #
 # File        : codes.py
 # Maintainer  : Felix C. Stegerman <flx@obfusk.net>
-# Date        : 2020-04-06
+# Date        : 2020-04-17
 #
 # Copyright   : Copyright (C) 2020  Felix C. Stegerman
 # Version     : v0.0.1
@@ -125,7 +125,10 @@ def make_guess(cur, name, word):
   if word in key["black"]:
     return dict(game_over = True)
   elif word in key["green"]:
-    return dict(green = cur["green"] | set([word]))
+    green = cur["green"] | set([word])
+    if all_green(cur, side, green):
+      return dict(green = green, hint = None, side = other_side(side))
+    return dict(green = green)
   elif word in key["white"]:
     new = give_up(cur, name)
     return { ws : cur[ws] | set([word]), **new }
@@ -136,7 +139,13 @@ def give_up(cur, name):
   if not cur["hint"]: raise InvalidAction("no hint")
   if cur["players"][name] != cur["side"]:
     raise InvalidAction("wrong side")
+  if all_green(cur, other_side(cur["side"])):
+    return dict(hint = None)
   return dict(hint = None, side = other_side(cur["side"]))
+
+def all_green(cur, side, green = None):
+  if green is None: green = cur["green"]
+  return len(green & cur["key"][side]["green"]) == 9
 
 def colour_of(cur, name, word):
   if not cur["side"]: return None
@@ -205,13 +214,15 @@ def r_play():
         new = give_hint(cur, name, h)
       elif action == "guess":
         new = make_guess(cur, name, word)
-      elif action == "give up":
+      elif action == "end turn":
         new = give_up(cur, name)
       if new: update_game(game, new)
     return render_template("play.html", **data(cur, game, name))
   except InProgress:
     return render_template("late.html", game = game)
   except Oops as e:
-    return render_template("error.html", error = e.msg()), 400
+    d = dict(game = game if valid_ident(game) else None,
+             name = name if valid_ident(name) else None)
+    return render_template("error.html", error = e.msg(), **d), 400
 
 # vim: set tw=70 sw=2 sts=2 et fdm=marker :
